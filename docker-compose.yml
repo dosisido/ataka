@@ -105,6 +105,18 @@ services:
     networks:
       - ataka-exploits
 
+  valkey-exploits:
+    image: valkey/valkey:latest
+    container_name: valkey-server
+    environment:
+      - VALKEY_EXTRA_FLAGS=--bind 0.0.0.0 --dir /data --appendonly no --save 900 1 --save 300 10 --save 60 10000
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/expoits-valkey:/data
+    command: ["valkey-server"]
+    restart: unless-stopped
+
   ctfcode:
     image: openattackdefensetools/ataka-ctfcode
     restart: always
