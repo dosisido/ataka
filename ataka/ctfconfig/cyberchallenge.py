@@ -11,6 +11,8 @@ CC_NOP_TEAM_ID = "0"
 CC_GAME_SERVER_IP = '10.10.0.1'
 CC_TEAM_TOKEN = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 
+CC_SUBMIT_ENDPOINT = f'http://{CC_GAME_SERVER_IP}:8080/flags'
+CC_FLAGIDS_ENDPOINT = f'http://{CC_GAME_SERVER_IP}:8081/flagIds'
 # Ataka Host Domain / IP
 ATAKA_HOST = '10.91.142.1:8000'
 
@@ -47,7 +49,7 @@ def parse_flag(flag: str) -> tuple[int, int, int]:
 def get_targets():
     global services
 
-    r = requests.get(f"http://{CC_GAME_SERVER_IP}:8081/flagIds", timeout=10)
+    r = requests.get(CC_FLAGIDS_ENDPOINT, timeout=10)
     data = r.json()
     if not services:
         services = list(data.keys())
@@ -103,7 +105,7 @@ def parse_submission(sub: str) -> FlagStatus:
 def submit_flags(_flags):
     flags = {flag: i for i, flag in enumerate(_flags)}
 
-    data = requests.put(f'http://{CC_GAME_SERVER_IP}:8080/flags', headers={
+    data = requests.put(CC_SUBMIT_ENDPOINT, headers={
         'X-Team-Token': CC_TEAM_TOKEN
     }, json=_flags).json()
 
