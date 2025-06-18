@@ -30,7 +30,7 @@ FLAG_BATCHSIZE = 69
 FLAG_RATELIMIT = 1  # Wait in seconds between each call of submit_flags()
 
 # When the CTF starts
-START_TIME = int(datetime.fromisoformat("2024-06-15T10:11:11").timestamp())
+START_TIME = int(datetime.fromisoformat("2024-06-15T10:11:11+02:00").timestamp())
 
 
 ### END EXPORTED CONFIG
@@ -58,7 +58,7 @@ def get_targets():
     for service_number, service in enumerate(services):
         for team_id, info in data[service].items():
             for tick, flagId in info.items():
-                if (tick, team_id, service_number) in valid_flags: continue
+                if (int(tick), int(team_id), int(service_number)) in valid_flags: continue
                 targets[service].append({
                     "ip": f"10.60.{team_id}.1",
                     "extra": json.dumps(flagId),
@@ -100,12 +100,12 @@ def parse_submission(sub: str) -> FlagStatus:
     # fallback
     return FlagStatus.UNKNOWN
 
-def submit_flags(flags):
-    flags = {flag: i for i, flag in enumerate(flags)}
+def submit_flags(_flags):
+    flags = {flag: i for i, flag in enumerate(_flags)}
 
     data = requests.put(f'http://{CC_GAME_SERVER_IP}:8080/flags', headers={
         'X-Team-Token': CC_TEAM_TOKEN
-    }, json=flags).json()
+    }, json=_flags).json()
 
     result = [FlagStatus.ERROR]*len(flags)
     for flag_response in data:
