@@ -18,7 +18,7 @@ ATAKA_HOST = '10.91.142.1:8000'
 RUNLOCAL_TARGETS = [f"10.60.{CC_NOP_TEAM_ID}.1"]
 
 # IPs that are always excluded from attacks.
-STATIC_EXCLUSIONS = {f'10.60.{CC_TEAM_ID}.1', f'10.60.{CC_NOP_TEAM_ID}.1'}
+STATIC_EXCLUSIONS = {f'10.60.{CC_TEAM_ID}.1'}
 
 ROUND_TIME = 120
 
