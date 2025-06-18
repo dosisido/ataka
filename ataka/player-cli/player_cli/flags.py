@@ -13,7 +13,7 @@ from player_cli.util import request, ERROR_STR, magentify, greenify, blueify, re
 
 app = typer.Typer(no_args_is_help=True)
 
-FLAG_STATUS_IS_FINAL = {'ok', 'duplicate', 'duplicate_not_submitted', 'nop', 'ownflag', 'inactive', 'invalid'}
+FLAG_STATUS_IS_FINAL = {'ok', 'duplicate', 'duplicate_not_submitted', 'NOP', 'ownflag', 'inactive', 'invalid'}
 
 FLAG_STATUS_COLOR = {
     'ok': greenify,
@@ -23,7 +23,7 @@ FLAG_STATUS_COLOR = {
     'duplicate_not_submitted': lambda x: x,
     'unknown': redify,
     'error': redify,
-    'nop': yellowfy,
+    'NOP': yellowfy,
     'ownflag': yellowfy,
     'inactive': lambda x: x,
     'invalid': lambda x: x,
