@@ -30,7 +30,7 @@ FLAG_BATCHSIZE = 69
 FLAG_RATELIMIT = 1  # Wait in seconds between each call of submit_flags()
 
 # When the CTF starts
-START_TIME = int(datetime.datetime.fromisoformat("2024-06-15T10:11:11"))
+START_TIME = int(datetime.fromisoformat("2024-06-15T10:11:11").timestamp())
 
 
 ### END EXPORTED CONFIG
