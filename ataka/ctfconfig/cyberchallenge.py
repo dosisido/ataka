@@ -2,7 +2,8 @@ import json
 from datetime import datetime
 from ataka.common.flag_status import FlagStatus
 import requests
-from collections import defaultdict
+from collections import defaultdict, namedtuple
+import random
 
 ### EXPORTED CONFIG
 
@@ -34,11 +35,26 @@ FLAG_RATELIMIT = 1  # Wait in seconds between each call of submit_flags()
 # When the CTF starts
 START_TIME = int(datetime.fromisoformat("2024-06-15T10:11:11+02:00").timestamp())
 
+# Each how many ticks should clear the valid flags
+CLEAR_RATE = 20
+CLEAR_LAST_N_TICKS = 10
+
+FlagSubmission = namedtuple("FlagSubmission", ["msg", "flag", "status"])
+get_cur_tick = lambda: int(datetime.now().timestamp() - START_TIME) // ROUND_TIME
 
 ### END EXPORTED CONFIG
 
 valid_flags = set()
 services: list[str] = []
+
+def clear_valid_flags():
+    global valid_flags
+    cur_tick = get_cur_tick()
+    valid_flags = {
+        (tick, team_id, service_number) for tick, team_id, service_number in valid_flags
+                   if tick >= cur_tick - CLEAR_LAST_N_TICKS
+    }
+
 
 def parse_flag(flag: str) -> tuple[int, int, int]:
     round_number = int(flag[0:2], 36)
@@ -65,13 +81,15 @@ def get_targets():
                     "ip": f"10.60.{team_id}.1",
                     "extra": json.dumps(flagId),
                 })
+    
+    # if get_cur_tick() % CLEAR_RATE == 0: clear_valid_flags()
 
     return dict(targets)
 
 
-def parse_submission(sub: str) -> FlagStatus:
-    status = sub["status"]
-    msg = sub["msg"].lower()
+def parse_submission(sub: FlagSubmission) -> FlagStatus:
+    status = sub.status
+    msg = sub.msg.lower()
 
     if status == "ACCEPTED":
         return FlagStatus.OK
@@ -111,7 +129,12 @@ def submit_flags(_flags):
 
     result = [FlagStatus.ERROR]*len(flags)
     for flag_response in data:
-        flag = flag_response['flag']
+        submission = FlagSubmission(
+            msg=flag_response.get("msg", ""),
+            flag=flag_response.get("flag", ""),
+            status=flag_response.get("status", "")
+        )
+        flag = submission.flag
         status = parse_submission(flag_response)
         result[flags[flag]] = status
         if status == FlagStatus.OK:
