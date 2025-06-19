@@ -68,8 +68,8 @@ def get_targets():
     r = requests.get(CC_FLAGIDS_ENDPOINT, timeout=10)
     data = r.json()
     if not services:
-        services = list(data.keys())
-        print(f"Services: {services}")
+        services = requests.get(f'http://{CC_GAME_SERVER_IP}:8081/').json().get('services', [])
+        print(services)
 
     targets = defaultdict(list)
 
@@ -81,7 +81,7 @@ def get_targets():
                     "ip": f"10.60.{team_id}.1",
                     "extra": json.dumps(flagId),
                 })
-    
+
     # if get_cur_tick() % CLEAR_RATE == 0: clear_valid_flags()
 
     return dict(targets)
