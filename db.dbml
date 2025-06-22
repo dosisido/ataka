@@ -1,10 +1,24 @@
-Enum Status {
+Enum JobStatus {
   QUEUED
   RUNNING
   FINISHED
   FAILED
   TIMEOUT
   CANCELLED
+}
+
+Enum FlagStatus {
+  UNKNOWN
+  OK
+  QUEUED
+  PENDING
+  DUPLICATE
+  DUPLICATE_NOT_SUBMITTED
+  ERROR
+  NOP
+  OWNFLAG
+  INACTIVE
+  INVALID
 }
 
 Table exploit_histories {
@@ -25,7 +39,7 @@ Table executions {
   id Integer [pk]
   job_id Integer
   target_id Integer
-  status Status
+  status JobStatus
   stdout Text
   stderr Text
   timestamp DateTime
@@ -47,7 +61,7 @@ Table exploits {
 Table flags {
   id Integer [pk]
   flag String
-  status Status
+  status FlagStatus
   timestamp DateTime
   execution_id Integer
   stdout Boolean
@@ -61,7 +75,7 @@ Table jobs {
   id Integer [pk]
   exploit_id String
   manual_id String
-  status Status
+  status JobStatus
   timeout DateTime
   timestamp DateTime
 
