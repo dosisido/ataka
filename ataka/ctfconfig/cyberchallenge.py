@@ -3,7 +3,6 @@ from datetime import datetime
 from ataka.common.flag_status import FlagStatus
 import requests
 from collections import defaultdict, namedtuple
-import random
 
 ### EXPORTED CONFIG
 
@@ -14,6 +13,7 @@ CC_TEAM_TOKEN = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 
 CC_SUBMIT_ENDPOINT = f'http://{CC_GAME_SERVER_IP}:8080/flags'
 CC_FLAGIDS_ENDPOINT = f'http://{CC_GAME_SERVER_IP}:8081/flagIds'
+CC_SERVICES_ENDPOINT = f'http://{CC_GAME_SERVER_IP}:8081/'
 # Ataka Host Domain / IP
 ATAKA_HOST = '10.91.142.1:8000'
 
@@ -30,7 +30,7 @@ FLAG_REGEX = r"[A-Z0-9]{31}=", 0
 
 FLAG_BATCHSIZE = 69
 
-FLAG_RATELIMIT = 1  # Wait in seconds between each call of submit_flags()
+FLAG_RATELIMIT = 2  # Wait in seconds between each call of submit_flags()
 
 # When the CTF starts
 START_TIME = int(datetime.fromisoformat("2024-06-15T10:11:11+02:00").timestamp())
@@ -65,13 +65,22 @@ def parse_flag(flag: str) -> tuple[int, int, int]:
 def get_targets():
     global services
 
-    r = requests.get(CC_FLAGIDS_ENDPOINT, timeout=10)
+    r = requests.get(CC_FLAGIDS_ENDPOINT, timeout=5)
     data = r.json()
     if not services:
-        services = requests.get(f'http://{CC_GAME_SERVER_IP}:8081/').json().get('services', [])
-        print(services)
-
+        s = requests.get(CC_SERVICES_ENDPOINT, timeout=1).json().get('services', [])
+        tmp = []
+        for i in s:
+            tmp.append(i['id'])
+        services = tmp
+        print(f"Services: {services}")
+        
     targets = defaultdict(list)
+    if not data: # rete chiusa
+        for s in services:
+            targets[s] = []
+
+        return dict(targets)
 
     for service_number, service in enumerate(services):
         for team_id, info in data[service].items():
@@ -127,7 +136,7 @@ def submit_flags(_flags):
         'X-Team-Token': CC_TEAM_TOKEN
     }, json=_flags).json()
 
-    result = [FlagStatus.ERROR]*len(flags)
+    result = [FlagStatus.ERROR]*len(_flags)
     for flag_response in data:
         submission = FlagSubmission(
             msg=flag_response.get("msg", ""),
@@ -135,7 +144,7 @@ def submit_flags(_flags):
             status=flag_response.get("status", "")
         )
         flag = submission.flag
-        status = parse_submission(flag_response)
+        status = parse_submission(submission)
         result[flags[flag]] = status
         if status == FlagStatus.OK:
             valid_flags.add(parse_flag(flag))
