@@ -103,7 +103,9 @@ services:
     networks:
       - ataka-exploits
 
-  valkey-exploits:
+  # Valkey server for CTF code and exploits
+  # not currently used by ataka but useful for complex exploits and ctfconfigs 
+  valkey:
     image: valkey/valkey:latest
     container_name: valkey-server
     environment:
@@ -111,9 +113,12 @@ services:
     ports:
       - "${BIND_ADDRESS}:6379:6379"
     volumes:
-      - ./data/exploits-valkey:/data
+      - ${DATA_STORE}/valkey:/data
     command: ["valkey-server"]
     restart: unless-stopped
+    networks:
+      - ataka
+      - ataka-exploits
 
   ctfcode:
     image: openattackdefensetools/ataka-ctfcode
