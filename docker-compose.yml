@@ -26,8 +26,6 @@ services:
     restart: always
     init: true
     hostname: ataka-postgres
-    ports:
-      - "5432:5432"
     networks:
       - ataka
     environment:
@@ -40,7 +38,7 @@ services:
     image: adminer:latest
     restart: always
     ports:
-      - "8080:8080"
+      - "${BIND_ADDRESS}:8080:8080"
     hostname: ataka-adminer
     networks:
       - ataka
@@ -59,7 +57,7 @@ services:
       - ${DATA_STORE}/shared:/data/shared:rw,z
       - ${DATA_STORE}/exploits:/data/exploits:rw,z
     ports:
-      - "8000:8000"
+      - "${BIND_ADDRESS}:8000:8000"
     security_opt:
       - label:disable
     depends_on:
@@ -111,7 +109,7 @@ services:
     environment:
       - VALKEY_EXTRA_FLAGS=--bind 0.0.0.0 --dir /data --appendonly no --save 900 1 --save 300 10 --save 60 10000
     ports:
-      - "6379:6379"
+      - "${BIND_ADDRESS}:6379:6379"
     volumes:
       - ./data/exploits-valkey:/data
     command: ["valkey-server"]
