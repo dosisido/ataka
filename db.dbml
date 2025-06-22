@@ -1,0 +1,91 @@
+Enum Status {
+  QUEUED
+  RUNNING
+  FINISHED
+  FAILED
+  TIMEOUT
+  CANCELLED
+}
+
+Table exploit_histories {
+  id String [pk]
+  service String
+
+  Note: "ExploitHistory"
+}
+
+Table exclusions {
+  exploit_history_id String [pk]
+  target_ip String [pk]
+
+  Note: "Exclusion"
+}
+
+Table executions {
+  id Integer [pk]
+  job_id Integer
+  target_id Integer
+  status Status
+  stdout Text
+  stderr Text
+  timestamp DateTime
+
+  Note: "Execution"
+}
+
+Table exploits {
+  id String [pk]
+  exploit_history_id String
+  docker_name String [unique]
+  active Boolean
+  author String
+  timestamp DateTime
+
+  Note: "Exploit"
+}
+
+Table flags {
+  id Integer [pk]
+  flag String
+  status Status
+  timestamp DateTime
+  execution_id Integer
+  stdout Boolean
+  start Integer
+  end Integer
+
+  Note: "Flag"
+}
+
+Table jobs {
+  id Integer [pk]
+  exploit_id String
+  manual_id String
+  status Status
+  timeout DateTime
+  timestamp DateTime
+
+  Note: "Job"
+}
+
+Table targets {
+  id Integer [pk]
+  version Integer
+  ip String
+  service String
+  extra String
+  timestamp DateTime
+
+  Indexes {
+    (service, version) [name: "service_version_index"]
+  }
+
+  Note: "Target"
+}
+
+Ref: exclusions.exploit_history_id > exploit_histories.id
+Ref: exploits.exploit_history_id > exploit_histories.id
+Ref: jobs.exploit_id > exploits.id
+Ref: executions.job_id > jobs.id
+Ref: executions.target_id > targets.id
+Ref: flags.execution_id > executions.id
