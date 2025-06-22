@@ -19,7 +19,7 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     volumes:
-      - rabbitmq-data:/var/lib/rabbitmq:rw
+      - ${DATA_STORE}/rabbitmq:/var/lib/rabbitmq:rw
 
   postgres:
     image: postgres:14-alpine
@@ -32,7 +32,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - postgres-data:/var/lib/postgresql/data:rw
+      - ${DATA_STORE}/postgres:/var/lib/postgresql/data:rw
 
   adminer:
     image: adminer:latest
@@ -154,11 +154,6 @@ services:
       - ataka
     env_file:
       - .env
-
-volumes:
-  postgres-data:
-  rabbitmq-data:
-
 
 networks:
   ataka:
